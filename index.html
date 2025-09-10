@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Git Mastery - Система контролю версій</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 
+        ІНСТРУКЦІЯ ДЛЯ ПУБЛІКАЦІЇ НА GITHUB PAGES:
+        
+        1. Створіть репозиторій на GitHub
+        2. Завантажте цей файл (git-tutorial.html) у корінь репозиторію
+        3. Перейменуйте файл на index.html (або створіть index.html з цим вмістом)
+        4. У налаштуваннях репозиторію (Settings) знайдіть розділ "Pages"
+        5. Виберіть джерело "Deploy from a branch" та гілку "main"
+        6. Збережіть налаштування
+        7. Ваш сайт буде доступний за адресою: https://ваш-username.github.io/назва-репозиторію
+        
+        Альтернативно: просто завантажте файл у репозиторій та перейменуйте на index.html
+        */
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-light: #718096;
+            --bg-primary: #f7fafc;
+            --bg-secondary: #edf2f7;
+        }
+        
+        [data-theme="dark"] {
+            --text-primary: #e2e8f0;
+            --text-secondary: #cbd5e0;
+            --text-light: #a0aec0;
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --glass-bg: rgba(0, 0, 0, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        /* Animated background particles */
+        .particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        .particles-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: var(--accent-gradient);
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .theme-toggle i {
+            font-size: 20px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Header */
+        header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            z-index: -1;
+        }
+        
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        header p {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        @keyframes titleGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+            100% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.6)); }
+        }
+        
+        /* Main content */
+        main {
+            padding: 2rem 0;
+            position: relative;
+        }
+        
+        section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            margin: 3rem 0;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s ease;
+        }
+        
+        section:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        section:hover::before {
+            transform: scaleX(1);
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h2 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid transparent;
+            border-image: var(--accent-gradient) 1;
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+        
+        h3 {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2rem 0 1.2rem 0;
+            position: relative;
+            padding-left: 1rem;
+        }
+        
+        h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+        
+        p {
+            margin-bottom: 1.2rem;
+            text-align: justify;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        ul {
+            margin: 1.5rem 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        li {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            transition: all 0.3s ease;
+        }
+        
+        li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.2rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        li:hover {
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+        }
+        
+        /* Git commands styling */
+        .command {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .command::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .command:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .command:hover::before {
+            left: 100%;
+        }
+        
+        .command code {
+            background: var(--dark-gradient);
+            color: #e2e8f0;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .command code::before {
+            content: '$';
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #38ef7d;
+            font-weight: bold;
+        }
+        
+        .command code {
+            padding-left: 2rem;
+        }
+        
+        .command-description {
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 1rem;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        .command:hover .copy-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+        
+        /* Certificate section */
+        .certificate {
+            text-align: center;
+            background: var(--secondary-gradient);
+            color: white;
+            border-radius: 25px;
+            padding: 4rem 3rem;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-hover);
+            animation: certificateGlow 4s ease-in-out infinite alternate;
+        }
+        
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes certificateGlow {
+            0% { box-shadow: 0 20px 40px rgba(240, 147, 251, 0.3); }
+            100% { box-shadow: 0 30px 60px rgba(245, 87, 108, 0.5); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .certificate-placeholder {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 3px dashed rgba(255,255,255,0.6);
+            border-radius: 20px;
+            padding: 4rem 3rem;
+            margin: 2rem 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .certificate-placeholder:hover {
+            transform: scale(1.02);
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* Links */
+        a {
+            color: #667eea;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+            transition: width 0.3s ease;
+        }
+        
+        a:hover {
+            color: #764ba2;
+            transform: translateY(-1px);
+        }
+        
+        a:hover::after {
+            width: 100%;
+        }
+        
+        .resources-list {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 15px;
+            border-left: 4px solid transparent;
+            border-image: var(--success-gradient) 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .resources-list::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--success-gradient);
+        }
+        
+        .resources-list li {
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .resources-list li:hover {
+            transform: translateX(10px);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark-gradient);
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-gradient);
+        }
+        
+        footer p {
+            margin: 0.5rem 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            section {
+                padding: 2rem 1.5rem;
+                margin: 2rem 0;
+            }
+            
+            .command code {
+                font-size: 1rem;
+                padding: 0.8rem 1.2rem;
+            }
+            
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                padding: 10px;
+            }
+        }
+        
+        /* Highlight important text */
+        .highlight {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-gradient);
+            opacity: 0.3;
+        }
+        
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="particles-bg"></div>
+    
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- Theme toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </div>
+    
+    <header>
+        <div class="container">
+            <h1>🚀 Git Mastery - Система контролю версій</h1>
+            <p>Повний навчальний курс для початківців з інтерактивними ефектами</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Вступ про системи контролю версій -->
+        <section>
+            <h2>📚 Що таке системи контролю версій?</h2>
+            <p>Система контролю версій (Version Control System, VCS) — це інструмент, який допомагає розробникам відстежувати зміни в коді протягом часу. Вона дозволяє зберігати історію всіх змін, повертатися до попередніх версій та співпрацювати з іншими розробниками.</p>
+            
+            <h3>Git - найпопулярніша система контролю версій</h3>
+            <p><span class="highlight">Git</span> — це розподілена система контролю версій, створена Лінусом Торвальдсом у 2005 році. Вона стала стандартом у сучасній розробці програмного забезпечення завдяки своїй швидкості, надійності та гнучкості.</p>
+            
+            <p>Git дозволяє розробникам працювати з кодом локально, створювати гілки для різних функцій, об'єднувати зміни та синхронізувати роботу з віддаленими репозиторіями.</p>
+        </section>
+
+        <!-- Основні можливості та переваги -->
+        <section>
+            <h2>✨ Основні можливості та переваги Git</h2>
+            
+            <h3>🔧 Ключові можливості:</h3>
+            <ul>
+                <li><strong>Розподілена архітектура</strong> - кожен розробник має повну копію історії проекту</li>
+                <li><strong>Гілки (branches)</strong> - можливість створювати паралельні лінії розробки</li>
+                <li><strong>Швидкість</strong> - операції виконуються локально, що забезпечує високу продуктивність</li>
+                <li><strong>Цілісність даних</strong> - всі об'єкти мають SHA-1 хеш для перевірки цілісності</li>
+                <li><strong>Стиснення</strong> - ефективне зберігання даних завдяки дельта-стисненню</li>
+            </ul>
+            
+            <h3>🎯 Переваги використання:</h3>
+            <ul>
+                <li><strong>Безпека</strong> - неможливо втратити код, оскільки історія зберігається повністю</li>
+                <li><strong>Співпраця</strong> - легка робота в команді з можливістю злиття змін</li>
+                <li><strong>Експерименти</strong> - можливість створювати гілки для тестування нових ідей</li>
+                <li><strong>Відстеження змін</strong> - детальна історія всіх модифікацій коду</li>
+                <li><strong>Відкат змін</strong> - можливість повернутися до будь-якої попередньої версії</li>
+            </ul>
+        </section>
+
+        <!-- Базові команди Git -->
+        <section>
+            <h2>⚡ 10 базових команд Git</h2>
+            <p>Ось найважливіші команди Git, які повинен знати кожен розробник:</p>
+            
+            <div class="command" data-command="git init">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git init</code>
+                <div class="command-description">Ініціалізує новий Git репозиторій у поточній директорії. Створює приховану папку .git з усією необхідною інформацією для контролю версій.</div>
+            </div>
+            
+            <div class="command" data-command="git clone <url>">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git clone &lt;url&gt;</code>
+                <div class="command-description">Клонує існуючий репозиторій з віддаленого сервера (наприклад, GitHub) на локальний комп'ютер. Створює повну копію проекту з усією історією.</div>
+            </div>
+            
+            <div class="command" data-command="git status">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git status</code>
+                <div class="command-description">Показує поточний стан робочої директорії та індекс. Відображає які файли змінені, додані або готові до коміту.</div>
+            </div>
+            
+            <div class="command" data-command="git add <file>">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git add &lt;файл&gt;</code>
+                <div class="command-description">Додає файли до індексу (staging area). Використовуйте "git add ." для додавання всіх змінених файлів. Файли потрапляють у "зону підготовки" перед комітом.</div>
+            </div>
+            
+            <div class="command" data-command='git commit -m "message"'>
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git commit -m "повідомлення"</code>
+                <div class="command-description">Створює новий коміт з усіх файлів у індексі. Коміт - це "знімок" стану проекту в певний момент часу з описовим повідомленням.</div>
+            </div>
+            
+            <div class="command" data-command="git push">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git push</code>
+                <div class="command-description">Відправляє локальні коміти до віддаленого репозиторію (наприклад, на GitHub). Синхронізує ваші зміни з іншими учасниками проекту.</div>
+            </div>
+            
+            <div class="command" data-command="git pull">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git pull</code>
+                <div class="command-description">Завантажує зміни з віддаленого репозиторію та автоматично зливає їх з поточною гілкою. Еквівалент git fetch + git merge.</div>
+            </div>
+            
+            <div class="command" data-command="git branch">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git branch</code>
+                <div class="command-description">Показує список всіх локальних гілок. Використовуйте "git branch &lt;назва&gt;" для створення нової гілки. Гілки дозволяють працювати над різними функціями паралельно.</div>
+            </div>
+            
+            <div class="command" data-command="git checkout <branch>">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git checkout &lt;гілка&gt;</code>
+                <div class="command-description">Перемикається на вказану гілку. Змінює робочу директорію відповідно до стану обраної гілки. Використовується для навігації між гілками.</div>
+            </div>
+            
+            <div class="command" data-command="git merge <branch>">
+                <button class="copy-btn" onclick="copyCommand(this)">📋 Копіювати</button>
+                <code>git merge &lt;гілка&gt;</code>
+                <div class="command-description">Зливає зміни з вказаної гілки в поточну гілку. Об'єднує різні лінії розробки в одну. Може вимагати вирішення конфліктів при злитті.</div>
+            </div>
+        </section>
+
+        <!-- Сертифікат курсу -->
+        <section>
+            <h2>🏆 Сертифікат курсу по Git</h2>
+            <div class="certificate">
+                <h3>Вітаємо з завершенням курсу!</h3>
+                <div class="certificate-placeholder">
+                    📜 CERTIFICATE 📜<br>
+                    Git Fundamentals Course<br>
+                    <small>Видано: [Дата]</small>
+                </div>
+                <p>Після успішного завершення всіх завдань та тестів ви отримаєте офіційний сертифікат про проходження курсу "Git - Система контролю версій".</p>
+            </div>
+        </section>
+
+        <!-- Джерела інформації -->
+        <section>
+            <h2>📖 Джерела інформації</h2>
+            <p>Рекомендовані ресурси для поглибленого вивчення Git:</p>
+            
+            <div class="resources-list">
+                <h3>Офіційна документація:</h3>
+                <ul>
+                    <li><a href="https://git-scm.com/doc" target="_blank">Офіційна документація Git</a> - повний посібник від розробників Git</li>
+                    <li><a href="https://git-scm.com/book" target="_blank">Pro Git Book</a> - безкоштовна книга Скотта Чаконна</li>
+                    <li><a href="https://git-scm.com/docs" target="_blank">Git Reference Manual</a> - довідник по всіх командах</li>
+                </ul>
+                
+                <h3>Навчальні ресурси:</h3>
+                <ul>
+                    <li><a href="https://learngitbranching.js.org/" target="_blank">Learn Git Branching</a> - інтерактивний туторіал з гілками</li>
+                    <li><a href="https://www.atlassian.com/git/tutorials" target="_blank">Atlassian Git Tutorials</a> - детальні туторіали від Atlassian</li>
+                    <li><a href="https://github.com/git/git" target="_blank">Git на GitHub</a> - вихідний код Git та додаткові ресурси</li>
+                </ul>
+                
+                <h3>Додаткові матеріали:</h3>
+                <ul>
+                    <li><a href="https://ohmygit.org/" target="_blank">Oh My Git!</a> - гра для вивчення Git</li>
+                    <li><a href="https://www.gitkraken.com/learn/git" target="_blank">GitKraken Git Tutorials</a> - візуальні туторіали</li>
+                    <li><a href="https://git-school.github.io/visualizing-git/" target="_blank">Visualizing Git</a> - візуалізація роботи Git</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Git Mastery Course. Створено для навчальних цілей.</p>
+            <p>💡 Продовжуйте практикуватися та експериментувати з Git!</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            
+            // Add click animation
+            themeToggle.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                themeToggle.style.transform = 'scale(1)';
+            }, 150);
+        });
+        
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Progress bar functionality
+        const progressBar = document.getElementById('progressBar');
+        
+        function updateProgressBar() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            progressBar.style.width = scrollPercent + '%';
+        }
+        
+        window.addEventListener('scroll', updateProgressBar);
+        
+        // Copy command functionality
+        function copyCommand(button) {
+            const commandElement = button.closest('.command');
+            const command = commandElement.getAttribute('data-command');
+            
+            navigator.clipboard.writeText(command).then(() => {
+                // Show success feedback
+                const originalText = button.textContent;
+                button.textContent = '✅ Скопійовано!';
+                button.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = command;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                button.textContent = '✅ Скопійовано!';
+                setTimeout(() => {
+                    button.textContent = '📋 Копіювати';
+                }, 2000);
+            });
+        }
+        
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all sections for scroll animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                section.classList.add('fade-in');
+                observer.observe(section);
+            });
+        });
+        
+        // Add floating particles effect
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = '4px';
+            particle.style.height = '4px';
+            particle.style.background = 'rgba(255, 255, 255, 0.6)';
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1';
+            
+            const startX = Math.random() * window.innerWidth;
+            const startY = window.innerHeight + 10;
+            const endY = -10;
+            const duration = Math.random() * 3000 + 2000;
+            
+            particle.style.left = startX + 'px';
+            particle.style.top = startY + 'px';
+            
+            document.body.appendChild(particle);
+            
+            particle.animate([
+                { transform: `translateY(0px)`, opacity: 0 },
+                { transform: `translateY(-${startY - endY}px)`, opacity: 1 },
+                { transform: `translateY(-${startY - endY + 100}px)`, opacity: 0 }
+            ], {
+                duration: duration,
+                easing: 'linear'
+            }).onfinish = () => {
+                particle.remove();
+            };
+        }
+        
+        // Create particles periodically
+        setInterval(createParticle, 500);
+        
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Add typing effect to title
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+        
+        // Initialize typing effect when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('header h1');
+            const originalText = title.textContent;
+            setTimeout(() => {
+                typeWriter(title, originalText, 80);
+            }, 1000);
+        });
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K to toggle theme
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                themeToggle.click();
+            }
+            
+            // Escape to scroll to top
+            if (e.key === 'Escape') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
+        // Add loading animation for external links
+        document.querySelectorAll('a[target="_blank"]').forEach(link => {
+            link.addEventListener('click', function() {
+                const loading = document.createElement('span');
+                loading.className = 'loading';
+                loading.style.marginLeft = '5px';
+                this.appendChild(loading);
+                
+                setTimeout(() => {
+                    loading.remove();
+                }, 2000);
+            });
+        });
+        
+        // Performance optimization: Debounce scroll events
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Apply debounced scroll handler
+        const debouncedUpdateProgress = debounce(updateProgressBar, 10);
+        window.removeEventListener('scroll', updateProgressBar);
+        window.addEventListener('scroll', debouncedUpdateProgress);
+    </script>
+</body>
+</html>
